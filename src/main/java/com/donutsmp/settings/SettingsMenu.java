@@ -1,114 +1,98 @@
 package com.donutsmp.settings;
 
-import io.papermc.paper.dialog.Dialog;
-import io.papermc.paper.registry.data.dialog.ActionButton;
-import io.papermc.paper.registry.data.dialog.DialogBase;
-import io.papermc.paper.registry.data.dialog.action.DialogAction;
-import io.papermc.paper.registry.data.dialog.type.DialogType;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickCallback;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.entity.Player;
-
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Builds the main category menu and each per-category settings dialog on the fly,
- * so button labels/colors always reflect the player's current values.
+ * All categories + their settings, matching the layout from the reference menu:
+ * Chat, Notifications, PvP, Visuals, Privacy, Scoreboard, General.
+ * Add/remove entries here — the dialog UI is generated from this automatically.
  */
-public final class SettingsMenu {
+public final class SettingsRegistry {
 
-    private final PlayerSettingsStore store;
-
-    public SettingsMenu(PlayerSettingsStore store) {
-        this.store = store;
+    // category id -> display title, icon-ish label handled in SettingsMenu
+    public static final LinkedHashMap<String, String> CATEGORIES = new LinkedHashMap<>();
+    static {
+        CATEGORIES.put("chat", "Chat");
+        CATEGORIES.put("notifications", "Notifications");
+        CATEGORIES.put("pvp", "PvP");
+        CATEGORIES.put("visuals", "Visuals");
+        CATEGORIES.put("privacy", "Privacy");
+        CATEGORIES.put("scoreboard", "Scoreboard");
+        CATEGORIES.put("general", "General");
     }
 
-    public void openMain(Player player) {
-        player.showDialog(buildMainDialog());
+    public static final Map<String, List<SettingDef>> SETTINGS = new LinkedHashMap<>();
+    static {
+        SETTINGS.put("chat", List.of(
+                SettingDef.onOff("public_chat", "Public Chat", true),
+                SettingDef.anyoneFriendsOff("private_messages", "Private Messages", 1),
+                SettingDef.onOff("server_chat_messages", "Server Chat Messages", true),
+                SettingDef.onOff("server_hotbar_messages", "Server Hotbar Messages", true),
+                SettingDef.anyoneFriendsOff("death_messages", "Death Messages", 1),
+                SettingDef.anyoneFriendsOff("advancement_messages", "Advancement Messages", 1),
+                SettingDef.onOff("join_leave_messages", "Join/Leave Messages", false)
+        ));
+
+        SETTINGS.put("notifications", List.of(
+                SettingDef.onOff("pay_alerts", "Pay Alerts", true),
+                SettingDef.onOff("teleport_alerts", "Teleport Alerts", true),
+                SettingDef.onOff("bounty_alerts", "Bounty Alerts", true),
+                // Linked to FrozenAuction's real toggle: /ah alert <on|off>
+                SettingDef.onOffLinked("auction_alerts", "Auction Alerts", true,
+                        "ah alert off", "ah alert on"),
+                // Linked to FrozenShop's real toggle: /toggleshopmessages (no args, just flips)
+                SettingDef.onOffToggleCommand("order_alerts", "Order Alerts", true,
+                        "toggleshopmessages"),
+                SettingDef.onOff("server_sounds", "Server Sounds", true),
+                SettingDef.onOff("follow_alerts", "Follow Alerts", true)
+        ));
+
+        SETTINGS.put("pvp", List.of(
+                SettingDef.onOff("fast_crystals", "Fast Crystals", true),
+                SettingDef.onOff("totem_particles", "Totem Particles", true),
+                SettingDef.onOff("explosion_particles", "Explosion Particles", true),
+                SettingDef.onOff("explosion_sounds", "Explosion Sounds", true),
+                SettingDef.onOff("combat_timer", "Combat Timer", true)
+        ));
+
+        SETTINGS.put("visuals", List.of(
+                SettingDef.onOff("display_donut_plus", "Display Donut+", true),
+                SettingDef.onOff("money_nametags", "Money Nametags", true),
+                // Linked to FrozenSell's real toggle: /worthtoggle (no args, just flips)
+                SettingDef.onOffToggleCommand("item_worth_lore", "Item Worth Lore", true,
+                        "worthtoggle"),
+                SettingDef.onOff("teleport_confirm_menus", "Teleport Confirm Menus", true)
+        ));
+
+        SETTINGS.put("privacy", List.of(
+                SettingDef.anyoneFriendsOff("teleport_requests", "Teleport Requests", 0),
+                SettingDef.anyoneFriendsOff("teleport_here_requests", "Teleport-Here Requests", 0),
+                SettingDef.anyoneFriendsOff("allow_payments", "Allow Payments", 0),
+                SettingDef.onOff("randomized_coords", "Randomized Coords", false),
+                SettingDef.onOff("private_transactions", "Private Transactions", false)
+        ));
+
+        SETTINGS.put("scoreboard", List.of(
+                SettingDef.onOff("scoreboard", "Scoreboard", true),
+                SettingDef.onOff("show_money", "Show Money", true),
+                SettingDef.onOff("show_shards", "Show Shards", true),
+                SettingDef.onOff("show_kills", "Show Kills", true),
+                SettingDef.onOff("show_deaths", "Show Deaths", true),
+                SettingDef.onOff("show_playtime", "Show Playtime", true)
+        ));
+
+        SETTINGS.put("general", List.of(
+                SettingDef.onOff("auction_quick_buy", "Auction Quick Buy", false),
+                SettingDef.onOff("auction_quick_sell", "Auction Quick Sell", false),
+                SettingDef.onOff("mob_spawns", "Mob Spawns", true),
+                SettingDef.onOff("phantom_spawning", "Phantom Spawning", true),
+                SettingDef.onOff("night_vision", "Night Vision", true),
+                SettingDef.onOff("destroy_pearl_on_death", "Destroy Pearl on Death", false)
+        ));
     }
 
-    private Dialog buildMainDialog() {
-        List<ActionButton> buttons = new ArrayList<>();
-
-        for (Map.Entry<String, String> entry : SettingsRegistry.CATEGORIES.entrySet()) {
-            String categoryId = entry.getKey();
-            String label = entry.getValue();
-
-            buttons.add(ActionButton.builder(Component.text(label, NamedTextColor.WHITE))
-                    .width(240)
-                    .action(DialogAction.customClick(
-                            (view, audience) -> {
-                                if (audience instanceof Player p) {
-                                    p.showDialog(buildCategoryDialog(p, categoryId, label));
-                                }
-                            },
-                            ClickCallback.Options.builder().uses(-1).build()
-                    ))
-                    .build());
-        }
-
-        return Dialog.create(builder -> builder.empty()
-                .base(DialogBase.builder(Component.text("Settings", NamedTextColor.WHITE))
-                        .body(List.of(
-                                io.papermc.paper.registry.data.dialog.body.DialogBody.plainMessage(
-                                        Component.text("Choose a category to change your Donut SMP settings",
-                                                NamedTextColor.GRAY))
-                        ))
-                        .build())
-                .type(DialogType.multiAction(buttons).build())
-        );
-    }
-
-    private Dialog buildCategoryDialog(Player player, String categoryId, String categoryLabel) {
-        List<SettingDef> defs = SettingsRegistry.SETTINGS.get(categoryId);
-        List<ActionButton> buttons = new ArrayList<>();
-
-        for (SettingDef def : defs) {
-            buttons.add(buildToggleButton(player, categoryId, categoryLabel, def));
-        }
-
-        // Back button returns to the main menu
-        buttons.add(ActionButton.builder(Component.text("Back", NamedTextColor.WHITE))
-                .width(496)
-                .action(DialogAction.customClick(
-                        (view, audience) -> {
-                            if (audience instanceof Player p) {
-                                p.showDialog(buildMainDialog());
-                            }
-                        },
-                        ClickCallback.Options.builder().uses(-1).build()
-                ))
-                .build());
-
-        return Dialog.create(builder -> builder.empty()
-                .base(DialogBase.builder(Component.text("Settings – " + categoryLabel, NamedTextColor.WHITE))
-                        .build())
-                .type(DialogType.multiAction(buttons).build())
-        );
-    }
-
-    private ActionButton buildToggleButton(Player player, String categoryId, String categoryLabel, SettingDef def) {
-        int index = store.get(player.getUniqueId(), def);
-        SettingDef.Option current = def.options().get(index);
-
-        Component label = Component.text(def.label() + ": ", NamedTextColor.WHITE)
-                .append(Component.text(current.text(), current.color()));
-
-        return ActionButton.builder(label)
-                .width(496)
-                .action(DialogAction.customClick(
-                        (view, audience) -> {
-                            if (audience instanceof Player p) {
-                                store.cycle(p.getUniqueId(), def);
-                                // Rebuild + reshow the same category so the label updates instantly
-                                p.showDialog(buildCategoryDialog(p, categoryId, categoryLabel));
-                            }
-                        },
-                        ClickCallback.Options.builder().uses(-1).build()
-                ))
-                .build();
+    private SettingsRegistry() {
     }
 }
