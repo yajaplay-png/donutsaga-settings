@@ -1,63 +1,89 @@
 package com.donutsmp.settings;
 
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
-
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-/**
- * Defines one toggleable/cyclable row in a settings category.
- * A plain ON/OFF switch is just a SettingDef with 2 options.
- * A row like "Private Messages: Anyone / Friends-Followed / Off" is 3 options.
- */
-public record SettingDef(String key, String label, List<Option> options, int defaultIndex,
-                          List<String> commandsPerOption) {
+public final class SettingsRegistry {
 
-    public record Option(String text, TextColor color) {
+    public static final LinkedHashMap<String, String> CATEGORIES = new LinkedHashMap<>();
+    static {
+        CATEGORIES.put("chat", "Chat");
+        CATEGORIES.put("notifications", "Notifications");
+        CATEGORIES.put("pvp", "PvP");
+        CATEGORIES.put("visuals", "Visuals");
+        CATEGORIES.put("privacy", "Privacy");
+        CATEGORIES.put("scoreboard", "Scoreboard");
+        CATEGORIES.put("general", "General");
     }
 
-    public SettingDef(String key, String label, List<Option> options, int defaultIndex) {
-        this(key, label, options, defaultIndex, null);
+    public static final Map<String, List<SettingDef>> SETTINGS = new LinkedHashMap<>();
+    static {
+        SETTINGS.put("chat", List.of(
+                SettingDef.onOff("public_chat", "Public Chat", true),
+                SettingDef.anyoneFriendsOff("private_messages", "Private Messages", 1),
+                SettingDef.onOff("server_chat_messages", "Server Chat Messages", true),
+                SettingDef.onOff("server_hotbar_messages", "Server Hotbar Messages", true),
+                SettingDef.anyoneFriendsOff("death_messages", "Death Messages", 1),
+                SettingDef.anyoneFriendsOff("advancement_messages", "Advancement Messages", 1),
+                SettingDef.onOff("join_leave_messages", "Join/Leave Messages", false)
+        ));
+
+        SETTINGS.put("notifications", List.of(
+                SettingDef.onOff("pay_alerts", "Pay Alerts", true),
+                SettingDef.onOff("teleport_alerts", "Teleport Alerts", true),
+                SettingDef.onOff("bounty_alerts", "Bounty Alerts", true),
+                SettingDef.onOffLinked("auction_alerts", "Auction Alerts", true,
+                        "ah alert off", "ah alert on"),
+                SettingDef.onOffToggleCommand("order_alerts", "Order Alerts", true,
+                        "toggleshopmessages"),
+                SettingDef.onOff("server_sounds", "Server Sounds", true),
+                SettingDef.onOff("follow_alerts", "Follow Alerts", true)
+        ));
+
+        SETTINGS.put("pvp", List.of(
+                SettingDef.onOff("fast_crystals", "Fast Crystals", true),
+                SettingDef.onOff("totem_particles", "Totem Particles", true),
+                SettingDef.onOff("explosion_particles", "Explosion Particles", true),
+                SettingDef.onOff("explosion_sounds", "Explosion Sounds", true),
+                SettingDef.onOff("combat_timer", "Combat Timer", true)
+        ));
+
+        SETTINGS.put("visuals", List.of(
+                SettingDef.onOff("display_donut_plus", "Display Donut+", true),
+                SettingDef.onOff("money_nametags", "Money Nametags", true),
+                SettingDef.onOffToggleCommand("item_worth_lore", "Item Worth Lore", true,
+                        "worthtoggle"),
+                SettingDef.onOff("teleport_confirm_menus", "Teleport Confirm Menus", true)
+        ));
+
+        SETTINGS.put("privacy", List.of(
+                SettingDef.anyoneFriendsOff("teleport_requests", "Teleport Requests", 0),
+                SettingDef.anyoneFriendsOff("teleport_here_requests", "Teleport-Here Requests", 0),
+                SettingDef.anyoneFriendsOff("allow_payments", "Allow Payments", 0),
+                SettingDef.onOff("randomized_coords", "Randomized Coords", false),
+                SettingDef.onOff("private_transactions", "Private Transactions", false)
+        ));
+
+        SETTINGS.put("scoreboard", List.of(
+                SettingDef.onOff("scoreboard", "Scoreboard", true),
+                SettingDef.onOff("show_money", "Show Money", true),
+                SettingDef.onOff("show_shards", "Show Shards", true),
+                SettingDef.onOff("show_kills", "Show Kills", true),
+                SettingDef.onOff("show_deaths", "Show Deaths", true),
+                SettingDef.onOff("show_playtime", "Show Playtime", true)
+        ));
+
+        SETTINGS.put("general", List.of(
+                SettingDef.onOff("auction_quick_buy", "Auction Quick Buy", false),
+                SettingDef.onOff("auction_quick_sell", "Auction Quick Sell", false),
+                SettingDef.onOff("mob_spawns", "Mob Spawns", true),
+                SettingDef.onOff("phantom_spawning", "Phantom Spawning", true),
+                SettingDef.onOff("night_vision", "Night Vision", true),
+                SettingDef.onOff("destroy_pearl_on_death", "Destroy Pearl on Death", false)
+        ));
     }
 
-    /** True if selecting this index should also run a real command as the player (e.g. a Frozen plugin's own toggle). */
-    public boolean hasCommand(int index) {
-        return commandsPerOption != null && commandsPerOption.get(index) != null;
-    }
-
-    public String commandFor(int index) {
-        return commandsPerOption.get(index);
-    }
-
-    public static SettingDef onOff(String key, String label, boolean defaultOn) {
-        return new SettingDef(key, label, List.of(
-                new Option("OFF", NamedTextColor.RED),
-                new Option("ON", NamedTextColor.GREEN)
-        ), defaultOn ? 1 : 0);
-    }
-
-    /** ON/OFF toggle that also dispatches a real plugin command like "ah alert on" / "ah alert off". */
-    public static SettingDef onOffLinked(String key, String label, boolean defaultOn,
-                                          String commandOff, String commandOn) {
-        return new SettingDef(key, label, List.of(
-                new Option("OFF", NamedTextColor.RED),
-                new Option("ON", NamedTextColor.GREEN)
-        ), defaultOn ? 1 : 0, List.of(commandOff, commandOn));
-    }
-
-    /** ON/OFF toggle backed by a plugin command that has no arguments (it just flips state each time it's run). */
-    public static SettingDef onOffToggleCommand(String key, String label, boolean defaultOn, String toggleCommand) {
-        return new SettingDef(key, label, List.of(
-                new Option("OFF", NamedTextColor.RED),
-                new Option("ON", NamedTextColor.GREEN)
-        ), defaultOn ? 1 : 0, List.of(toggleCommand, toggleCommand));
-    }
-
-    public static SettingDef anyoneFriendsOff(String key, String label, int defaultIndex) {
-        return new SettingDef(key, label, List.of(
-                new Option("Anyone", NamedTextColor.GREEN),
-                new Option("Friends/Followed", NamedTextColor.YELLOW),
-                new Option("Off", NamedTextColor.RED)
-        ), defaultIndex, null);
+    private SettingsRegistry() {
     }
 }
