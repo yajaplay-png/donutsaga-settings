@@ -58,7 +58,7 @@ public final class SettingsMenu {
                                                 NamedTextColor.GRAY))
                         ))
                         .build())
-                .type(DialogType.multiAction(buttons))
+                .type(DialogType.multiAction(buttons).build())
         );
     }
 
@@ -86,7 +86,7 @@ public final class SettingsMenu {
         return Dialog.create(builder -> builder.empty()
                 .base(DialogBase.builder(Component.text("Settings – " + categoryLabel, NamedTextColor.WHITE))
                         .build())
-                .type(DialogType.multiAction(buttons))
+                .type(DialogType.multiAction(buttons).build())
         );
     }
 
