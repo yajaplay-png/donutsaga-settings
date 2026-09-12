@@ -14,10 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Builds the main category menu and each per-category settings dialog on the fly,
- * so button labels/colors always reflect the player's current values.
- */
 public final class SettingsMenu {
 
     private final PlayerSettingsStore store;
@@ -60,7 +56,7 @@ public final class SettingsMenu {
                                                 NamedTextColor.GRAY))
                         ))
                         .build())
-                .type(DialogType.multiAction(buttons).build())
+                .type(DialogType.multiAction(buttons).columns(2).build())
         );
     }
 
@@ -73,7 +69,7 @@ public final class SettingsMenu {
         }
 
         buttons.add(ActionButton.builder(Component.text("Back", NamedTextColor.WHITE))
-                .width(496)
+                .width(400)
                 .action(DialogAction.customClick(
                         (view, audience) -> {
                             if (audience instanceof Player p) {
@@ -87,7 +83,7 @@ public final class SettingsMenu {
         return Dialog.create(builder -> builder.empty()
                 .base(DialogBase.builder(Component.text("Settings – " + categoryLabel, NamedTextColor.WHITE))
                         .build())
-                .type(DialogType.multiAction(buttons).build())
+                .type(DialogType.multiAction(buttons).columns(1).build())
         );
     }
 
@@ -99,7 +95,7 @@ public final class SettingsMenu {
                 .append(Component.text(current.text(), current.color()));
 
         return ActionButton.builder(label)
-                .width(496)
+                .width(400)
                 .action(DialogAction.customClick(
                         (view, audience) -> {
                             if (audience instanceof Player p) {
