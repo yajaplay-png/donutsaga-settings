@@ -1,0 +1,11 @@
+name: DonutSettings
+version: '1.0.0'
+main: com.donutsmp.settings.SettingsPlugin
+api-version: '1.21'
+author: YouAndClaude
+description: Native Minecraft dialog-based settings menu (Chat, Notifications, PvP, Visuals, Privacy, Scoreboard, General)
+
+commands:
+  settings:
+    description: Open the Donut SMP settings dialog
+    usage: /settings
