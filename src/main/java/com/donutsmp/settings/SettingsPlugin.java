@@ -13,7 +13,10 @@ public final class SettingsPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        this.menu = new SettingsMenu(store);
+        GeneralFeatureListener generalFeatures = new GeneralFeatureListener(store);
+        getServer().getPluginManager().registerEvents(generalFeatures, this);
+
+        this.menu = new SettingsMenu(store, generalFeatures);
         getLogger().info("DonutSettings enabled — /settings is ready.");
     }
 
