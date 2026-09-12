@@ -5,12 +5,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * In-memory storage of each player's chosen option index per setting key.
- * Swap this out for a database/YAML-backed implementation if you want
- * settings to persist across restarts — the dialog code doesn't care
- * how this is implemented, only that get/set/cycle work.
- */
 public final class PlayerSettingsStore {
 
     private final Map<UUID, Map<String, Integer>> data = new ConcurrentHashMap<>();
