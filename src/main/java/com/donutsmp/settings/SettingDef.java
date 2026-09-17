@@ -1,4 +1,4 @@
-package com.donutsmp.settings;
+package com.sagasetting;
 
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
