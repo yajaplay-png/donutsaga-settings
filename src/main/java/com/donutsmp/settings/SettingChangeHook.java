@@ -1,4 +1,4 @@
-package com.donutsmp.settings;
+package com.sagasetting;
 
 import org.bukkit.entity.Player;
 
