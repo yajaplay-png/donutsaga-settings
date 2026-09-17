@@ -1,4 +1,4 @@
-package com.donutsmp.settings;
+package com.sagasetting;
 
 import io.papermc.paper.dialog.Dialog;
 import io.papermc.paper.registry.data.dialog.ActionButton;
@@ -49,10 +49,10 @@ public final class SettingsMenu {
         }
 
         return Dialog.create(builder -> builder.empty()
-                .base(DialogBase.builder(Component.text("Settings", NamedTextColor.WHITE))
+                .base(DialogBase.builder(Component.text("Saga Settings", NamedTextColor.WHITE))
                         .body(List.of(
                                 io.papermc.paper.registry.data.dialog.body.DialogBody.plainMessage(
-                                        Component.text("Choose a category to change your Donut SMP settings",
+                                        Component.text("Choose a category to change your Saga SMP settings",
                                                 NamedTextColor.GRAY))
                         ))
                         .build())
