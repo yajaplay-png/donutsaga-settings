@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.donutsmp</groupId>
-    <artifactId>donut-settings</artifactId>
+    <groupId>com.sagasetting</groupId>
+    <artifactId>saga-settings</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
@@ -17,20 +17,29 @@
             <id>papermc</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
+        <repository>
+            <id>placeholderapi</id>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+        </repository>
     </repositories>
 
     <dependencies>
-        <!-- Dialog API requires Paper 1.21.7+. Bump this to match your server's version. -->
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
             <version>1.21.11-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>2.11.6</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
-        <finalName>${project.artifactId}</finalName>
+        <finalName>SagaSetting</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
